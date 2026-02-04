@@ -57,7 +57,7 @@ show_url_list() {
 
 	# Show gum filter and get selected URL
 	local url
-	url=$(echo "$url_list" | gum filter --placeholder="Select URL to open...")
+	url=$(echo "$url_list" | gum filter --placeholder="Select URL to open..." --padding "0 0 -1 0")
 
 	# Check if a URL was selected (user didn't press ESC)
 	if [ -n "$url" ]; then
