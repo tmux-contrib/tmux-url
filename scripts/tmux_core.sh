@@ -68,6 +68,11 @@ _tmux_get_pane_content() {
 	fi
 }
 
+# Get URL unwrap setting
+_tmux_get_unwrap_urls() {
+	_tmux_get_option "@url-unwrap" "on"
+}
+
 # Auto-detect browser command based on platform
 _get_opener() {
 	# Platform detection

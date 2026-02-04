@@ -5,6 +5,7 @@ A tmux plugin that extracts URLs from the current pane and allows interactive se
 ## Features
 
 - 🔍 **Smart URL Detection**: Extracts URLs with explicit schemes (http, https, ftp, git, ssh), email addresses, and common domain names
+- 🔗 **Wrapped URL Support**: Automatically detects and rejoins URLs that span multiple lines
 - 🎯 **Interactive Selection**: Beautiful terminal UI powered by gum filter
 - 🚀 **Quick Access**: Simple `Prefix + u` keybinding
 - 🌐 **Cross-Platform**: Works on macOS, Linux, and Windows
@@ -97,6 +98,31 @@ Set how many lines to scan from pane history (default: `10000`):
 set -g @url-buffer-lines 5000
 ```
 
+### Wrapped URL Detection
+
+Enable or disable automatic unwrapping of URLs that span multiple lines (default: `on`):
+
+```bash
+set -g @url-unwrap on   # Enable wrapped URL detection (default)
+set -g @url-unwrap off  # Disable if you experience issues
+```
+
+**How it works**: Long URLs that wrap across multiple lines due to terminal width limitations are automatically rejoined before detection. This is particularly useful for:
+
+- OAuth/authorization URLs with long query parameters
+- Deep file paths in URLs
+- URLs with extensive percent-encoding
+- API endpoints with multiple query parameters
+
+**Example of wrapped URL that will be detected**:
+```
+https://oauth.example.com/authorize?code=true&client_id=abc123def456&response_type=
+code&redirect_uri=https%3A%2F%2Fapp.example.com%2Fcallback&scope=read%20write&
+state=xyz789
+```
+
+The plugin uses intelligent heuristics to detect URL continuations while avoiding false positives like email signatures or adjacent independent URLs.
+
 ### Example Configuration
 
 ```bash
@@ -107,6 +133,9 @@ set -g @url-key 'o'
 
 # Scan last 5000 lines
 set -g @url-buffer-lines 5000
+
+# Enable wrapped URL detection (default: on)
+set -g @url-unwrap on
 
 # Load plugin
 set -g @plugin 'tmux-contrib/tmux-url'

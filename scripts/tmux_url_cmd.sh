@@ -31,8 +31,12 @@ main() {
 get_url_list() {
 	local pane="${1:-}"
 
-	# Get pane content and pipe to Perl script
-	_tmux_get_pane_content "$pane" | "$_tmux_url_source_dir/tmux_url.pl"
+	# Get unwrap setting
+	local unwrap_urls
+	unwrap_urls=$(_tmux_get_unwrap_urls)
+
+	# Get pane content and pipe to Perl script with UNWRAP_URLS environment variable
+	UNWRAP_URLS="$unwrap_urls" _tmux_get_pane_content "$pane" | "$_tmux_url_source_dir/tmux_url.pl"
 }
 
 # Show URL list in gum filter and open selected URL
