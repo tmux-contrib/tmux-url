@@ -9,23 +9,23 @@ source "$_tmux_url_source_dir/tmux_core.sh"
 
 # Main function
 main() {
-    local url_list
-    # Extract URLs from current pane
-    url_list=$("$_tmux_url_source_dir/tmux_url_cmd.sh" get-url-list)
+	local url_list
+	# Extract URLs from current pane
+	url_list=$("$_tmux_url_source_dir/tmux_url_cmd.sh" get-url-list)
 
-    # Check if any URLs were found
-    if [ -z "$url_list" ]; then
-        tmux display-message "No URLs found in current pane"
-        exit 0
-    fi
+	# Check if any URLs were found
+	if [ -z "$url_list" ]; then
+		tmux display-message "No URLs found in current pane"
+		exit 0
+	fi
 
-    local url_file
-    url_file=$(mktemp)
-    # Create a temporary file to store the URL list
-    echo "$url_list" >"$url_file"
+	local url_file
+	url_file=$(mktemp)
+	# Create a temporary file to store the URL list
+	echo "$url_list" >"$url_file"
 
-    # Show gum filter in a split window
-    tmux split-window -l 20 "$_tmux_url_source_dir/tmux_url_cmd.sh" show-url-list "$url_file"
+	# Show gum filter in a split window (reuse if already open)
+	tmux split-window -n "url-list" -l 20 -S "$_tmux_url_source_dir/tmux_url_cmd.sh" show-url-list "$url_file"
 }
 
 # Run main function
