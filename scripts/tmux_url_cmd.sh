@@ -64,9 +64,8 @@ show_url_list() {
 		# Get the URL opener command
 		local url_opener
 		url_opener=$(_get_opener)
-
-		# Open the selected URL in background
-		"$url_opener" "$url" &>/dev/null &
+		# Open the selected URL in background and detach from shell
+		"$url_opener" "$url"
 	fi
 }
 
