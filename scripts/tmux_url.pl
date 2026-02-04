@@ -16,8 +16,9 @@ my %urls_seen;
 my @urls;
 
 # Pattern components (inspired by xurls)
-# Common schemes
-my $schemes = '(?:https?|ftps?|git|ssh|file|mailto|tel|sms|data)';
+# Common URI schemes (from IANA registry)
+# Includes: web, file transfer, communication, version control, and application schemes
+my $schemes = '(?:https?|ftps?|sftp|file|ws|wss|git|ssh|svn|mailto|tel|sms|sip|sips|xmpp|irc|ircs|vnc|magnet|bitcoin|slack|spotify|steam|vscode|data)';
 
 # IPv4 octet
 my $octet = '(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])';
@@ -26,7 +27,8 @@ my $octet = '(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])';
 my $ipv4 = "$octet\\.$octet\\.$octet\\.$octet";
 
 # Common TLDs for relaxed mode (domain-only matching)
-my $tlds_common = '(?:com|org|net|edu|gov|mil|int|io|co|uk|us|de|jp|fr|au|ca|cn|in|br|ru|it|es|nl|se|ch|dk|at|be|no|fi|pl|cz|gr|pt|ie|nz|kr|hk|sg|my|th|vn|ph|tw|tr|za|ae|sa|eg|ng|ke|app|dev|tech|online|site|website|space|store|blog|news|media|info|biz|name|pro|mobi|asia)';
+# Includes: generic TLDs, major country codes, and popular new gTLDs
+my $tlds_common = '(?:com|org|net|edu|gov|mil|int|io|co|ac|ad|ae|af|ag|ai|al|am|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|ss|st|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw|app|dev|tech|online|site|website|space|store|blog|news|media|info|biz|name|pro|mobi|asia|xyz|top|club|shop|live|today|world|earth|life|cloud|email|digital|global|zone|works|ninja|guru|expert|tips|solutions|photos|travel|guide)';
 
 # Permissive TLD pattern for strict mode (with scheme) - matches any 2-63 letter TLD
 my $tlds_any = '[a-zA-Z]{2,63}';
