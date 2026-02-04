@@ -84,17 +84,7 @@ Change the key binding (default: `u`):
 set -g @url-key 'o'  # Use Prefix + o instead
 ```
 
-### Browser Command
-
-Specify a custom browser (default: auto-detected):
-
-```bash
-set -g @url-browser 'firefox'           # Use Firefox
-set -g @url-browser 'google-chrome'     # Use Chrome
-set -g @url-browser 'open -a Safari'    # Use Safari on macOS
-```
-
-**Auto-detection** (if not specified):
+**Browser auto-detection**:
 - macOS: `open`
 - Linux: `xdg-open`
 - Windows: `start`
@@ -107,14 +97,6 @@ Set how many lines to scan from pane history (default: `10000`):
 set -g @url-buffer-lines 5000
 ```
 
-### UI Height
-
-Configure gum filter height (default: `20`):
-
-```bash
-set -g @url-gum-height 15
-```
-
 ### Example Configuration
 
 ```bash
@@ -123,14 +105,8 @@ set -g @url-gum-height 15
 # Custom key binding
 set -g @url-key 'o'
 
-# Use Firefox
-set -g @url-browser 'firefox'
-
 # Scan last 5000 lines
 set -g @url-buffer-lines 5000
-
-# Show 15 lines in picker
-set -g @url-gum-height 15
 
 # Load plugin
 set -g @plugin 'tmux-contrib/tmux-url'
@@ -169,9 +145,7 @@ which perl  # Should show path to perl
 
 ### URLs not opening
 
-- Check that your browser is correctly configured
-- Try setting `@url-browser` explicitly
-- Verify the browser command works from terminal: `open https://example.com`
+- Verify the browser command works from terminal: `open https://example.com` (macOS) or `xdg-open https://example.com` (Linux)
 
 ## Similar Projects
 
