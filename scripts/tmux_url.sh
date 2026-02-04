@@ -19,19 +19,13 @@ main() {
         exit 0
     fi
 
-    # Get gum filter height from config
-    local height
-    height=$(_tmux_get_option "@url-gum-height" "20")
+    local url_file
+    url_file=$(mktemp)
+    # Create a temporary file to store the URL list
+    echo "$url_list" >"$url_file"
 
-    # Show gum filter and get selected URL
-    local url
-    url=$(echo "$url_list" | gum filter --height="$height" --placeholder="Select URL to open...")
-
-    # Check if a URL was selected (user didn't press ESC)
-    if [ -n "$url" ]; then
-        # Open the selected URL
-        "$_tmux_url_source_dir/tmux_url_cmd.sh" open-url "$url"
-    fi
+    # Show gum filter in a split window
+    tmux split-window -l 20 "$_tmux_url_source_dir/tmux_url_cmd.sh" show-url-list "$url_file"
 }
 
 # Run main function
