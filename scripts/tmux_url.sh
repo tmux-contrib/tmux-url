@@ -25,7 +25,7 @@ main() {
 	echo "$url_list" >"$url_file"
 
 	# Show gum filter in a split window (reuse if already open)
-	tmux split-window -n "url-list" -l 20 -S "$_tmux_url_source_dir/tmux_url_cmd.sh" show-url-list "$url_file"
+	tmux display-popup "$_tmux_url_source_dir/tmux_url_cmd.sh" show-url-list "$url_file"
 }
 
 # Run main function
