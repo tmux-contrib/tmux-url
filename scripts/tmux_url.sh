@@ -11,7 +11,7 @@ source "$_tmux_url_source_dir/tmux_core.sh"
 main() {
     local url_list
     # Extract URLs from current pane
-    url_list=$("$_tmux_url_source_dir/tmux_url_cmd.sh" extract-url-list)
+    url_list=$("$_tmux_url_source_dir/tmux_url_cmd.sh" get-url-list)
 
     # Check if any URLs were found
     if [ -z "$url_list" ]; then

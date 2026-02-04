@@ -13,22 +13,22 @@ main() {
 	shift
 
 	case "$command" in
-	extract-url-list)
-		extract_url_list "$@"
+	get-url-list)
+		get_url_list "$@"
 		;;
 	show-url-list)
 		show_url_list "$@"
 		;;
 	*)
 		echo "Unknown command: $command"
-		echo "Usage: $0 {extract-url-list|show-url-list}"
+		echo "Usage: $0 {get-url-list|show-url-list}"
 		exit 1
 		;;
 	esac
 }
 
-# Extract URLs from current pane
-extract_url_list() {
+# Get URLs from current pane
+get_url_list() {
 	local pane="${1:-}"
 
 	# Get pane content and pipe to Perl script
@@ -59,14 +59,14 @@ show_url_list() {
 	local url
 	url=$(echo "$url_list" | gum filter --placeholder="Select URL to open...")
 
-	# Find the URL opener
-	local url_opener
-	url_opener=$(_get_opener)
-
 	# Check if a URL was selected (user didn't press ESC)
 	if [ -n "$url" ]; then
-		# Open the selected URL
-		url_opener "$url"
+		# Get the URL opener command
+		local url_opener
+		url_opener=$(_get_opener)
+
+		# Open the selected URL in background
+		"$url_opener" "$url" &>/dev/null &
 	fi
 }
 
