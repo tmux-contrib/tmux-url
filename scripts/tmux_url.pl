@@ -57,6 +57,10 @@ sub _is_url_continuation {
     return 0 if $next =~ m{^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}(?:\s|$)};
     return 0 if $next =~ m{^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\s|$)};
 
+    # If next line is just a word followed by colon (like "remote:", "origin:"), don't merge
+    # This prevents git output labels from being merged into URLs
+    return 0 if $next =~ m{^[a-zA-Z][a-zA-Z0-9]*:\s*$};
+
     # If next line starts with common English words or prose, don't merge
     # This catches cases like "This is some text" or "Thanks!"
     return 0 if $next =~ m{^(?:This|The|That|These|Those|It|Thanks|Please|Note|See|Check|Visit)\b}i;
@@ -70,7 +74,7 @@ sub _is_url_continuation {
     return 0 if $current =~ m{[.!?]\s+$};
 
     # URL path characters that indicate continuation
-    my $url_path_chars = qr{[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%]};
+    my $url_path_chars = '[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=%-]';
 
     # Strong indicators that URL continues:
     # 1. Ends with hyphen (common line break point)
@@ -163,12 +167,12 @@ my $tlds_common = '(?:com|org|net|edu|gov|mil|int|io|co|ac|ad|ae|af|ag|ai|al|am|
 my $tlds_any = '[a-zA-Z]{2,63}';
 
 # Domain label and domain patterns
-my $label = '[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?';
+my $label = '[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?';
 my $domain_strict = "$label(?:\\.$label)*\\.$tlds_any";  # Permissive for URLs with schemes
 my $domain_relaxed = "$label(?:\\.$label)*\\.$tlds_common";  # Conservative for domain-only
 
 # Path characters
-my $pathChars = '[a-zA-Z0-9\-._~:/?#\[\]@!$&\'()*+,;=%]';
+my $pathChars = '[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=%-]';
 
 # STRICT MODE: URLs with explicit schemes (permissive TLD matching)
 my $strictPattern = "($schemes://(?:$ipv4|$domain_strict|localhost)(?::\\d+)?(?:/$pathChars*)?)";
