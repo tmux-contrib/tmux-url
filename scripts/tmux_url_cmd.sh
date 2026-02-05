@@ -7,40 +7,30 @@ _tmux_url_source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source core utilities
 source "$_tmux_url_source_dir/tmux_core.sh"
 
-# Main command dispatcher
-main() {
-	local command="$1"
-	shift
-
-	case "$command" in
-	get-url-list)
-		get_url_list "$@"
-		;;
-	show-url-list)
-		show_url_list "$@"
-		;;
-	*)
-		echo "Unknown command: $command"
-		echo "Usage: $0 {get-url-list|show-url-list}"
-		exit 1
-		;;
-	esac
-}
-
 # Get URLs from current pane
-get_url_list() {
+# URL extraction flow:
+# 1. Get pane content from tmux
+# 2. Extract URLs using xurls (strict or relaxed mode)
+# 3. Deduplicate URLs with sort -u
+_get_url_list() {
 	local pane="${1:-}"
 
-	# Get unwrap setting
-	local unwrap_urls
-	unwrap_urls=$(_tmux_get_unwrap_urls)
+	# Get detection mode setting
+	local detection_mode
+	detection_mode=$(_tmux_get_detection_mode)
 
-	# Get pane content and pipe to Perl script with UNWRAP_URLS environment variable
-	UNWRAP_URLS="$unwrap_urls" _tmux_get_pane_content "$pane" | "$_tmux_url_source_dir/tmux_url.pl"
+	# Set xurls flags based on detection mode
+	local xurls_flags=""
+	if [ "$detection_mode" = "relaxed" ]; then
+		xurls_flags="-r"
+	fi
+
+	# Get pane content → extract URLs with xurls → deduplicate
+	_tmux_get_pane_content "$pane" | xurls $xurls_flags | sort -u
 }
 
 # Show URL list in gum filter and open selected URL
-show_url_list() {
+_show_url_list() {
 	local url_file="$1"
 
 	# Read URL list from file or stdin
@@ -71,6 +61,26 @@ show_url_list() {
 		# Open the selected URL in background and detach from shell
 		"$url_opener" "$url"
 	fi
+}
+
+# Main command dispatcher
+main() {
+	local command="$1"
+	shift
+
+	case "$command" in
+	get-url-list)
+		_get_url_list "$@"
+		;;
+	show-url-list)
+		_show_url_list "$@"
+		;;
+	*)
+		echo "Unknown command: $command"
+		echo "Usage: $0 {get-url-list|show-url-list}"
+		exit 1
+		;;
+	esac
 }
 
 # Run main function

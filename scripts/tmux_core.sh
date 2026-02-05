@@ -13,8 +13,8 @@ _check_dependencies() {
 		missing_deps+=("gum")
 	fi
 
-	if ! command -v perl &>/dev/null; then
-		missing_deps+=("perl")
+	if ! command -v xurls &>/dev/null; then
+		missing_deps+=("xurls")
 	fi
 
 	if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -28,10 +28,11 @@ _check_dependencies() {
 				echo "    - macOS: brew install gum"
 				echo "    - Linux: https://github.com/charmbracelet/gum/releases"
 				;;
-			perl)
-				echo "  perl: Usually pre-installed on macOS/Linux"
-				echo "    - macOS: Should be available by default"
-				echo "    - Linux: apt-get install perl / yum install perl"
+			xurls)
+				echo "  xurls: https://github.com/mvdan/xurls"
+				echo "    - macOS: brew install xurls"
+				echo "    - Linux: go install mvdan.cc/xurls/v2/cmd/xurls@latest"
+				echo "    - Or download from https://github.com/mvdan/xurls/releases"
 				;;
 			esac
 		done
@@ -68,9 +69,9 @@ _tmux_get_pane_content() {
 	fi
 }
 
-# Get URL unwrap setting
-_tmux_get_unwrap_urls() {
-	_tmux_get_option "@url-unwrap" "on"
+# Get URL detection mode (default: strict)
+_tmux_get_detection_mode() {
+	_tmux_get_option "@url-detection-mode" "strict"
 }
 
 # Auto-detect browser command based on platform

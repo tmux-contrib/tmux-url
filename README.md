@@ -4,19 +4,19 @@ A tmux plugin that extracts URLs from the current pane and allows interactive se
 
 ## Features
 
-- 🔍 **Smart URL Detection**: Extracts URLs with explicit schemes (http, https, ftp, git, ssh), email addresses, and common domain names
-- 🔗 **Wrapped URL Support**: Automatically detects and rejoins URLs that span multiple lines
-- 🎯 **Interactive Selection**: Beautiful terminal UI powered by gum filter
+- 🔍 **Smart URL Detection**: Powered by xurls for accurate URL extraction
+- 🎯 **Strict Mode by Default**: Only detects URLs with explicit schemes to reduce false positives
+- 🎨 **Interactive Selection**: Beautiful terminal UI powered by gum filter
 - 🚀 **Quick Access**: Simple `Prefix + u` keybinding
 - 🌐 **Cross-Platform**: Works on macOS, Linux, and Windows
-- ⚙️ **Configurable**: Customize key bindings, browser, buffer depth, and UI height
+- ⚙️ **Configurable**: Customize detection mode, key bindings, and browser
 - 📋 **Deduplication**: Automatically removes duplicate URLs
 
 ## Requirements
 
 - [tmux](https://github.com/tmux/tmux) (version 1.8+)
 - [gum](https://github.com/charmbracelet/gum) - Terminal UI toolkit
-- [perl](https://www.perl.org/) - Usually pre-installed on macOS/Linux
+- [xurls](https://github.com/mvdan/xurls) - URL extractor
 
 ### Installing Dependencies
 
@@ -25,9 +25,10 @@ A tmux plugin that extracts URLs from the current pane and allows interactive se
 - Linux: See [gum installation guide](https://github.com/charmbracelet/gum#installation)
 - Windows: See [gum releases](https://github.com/charmbracelet/gum/releases)
 
-**perl**: Usually pre-installed on most systems. If not:
-- macOS: Should be available by default
-- Linux: `apt-get install perl` or `yum install perl`
+**xurls**:
+- macOS: `brew install xurls`
+- Linux: `go install mvdan.cc/xurls/v2/cmd/xurls@latest`
+- Or download binary from [releases](https://github.com/mvdan/xurls/releases)
 
 ## Installation
 
@@ -98,31 +99,24 @@ Set how many lines to scan from pane history (default: `10000`):
 set -g @url-buffer-lines 5000
 ```
 
-### Wrapped URL Detection
+### URL Detection Mode
 
-Enable or disable automatic unwrapping of URLs that span multiple lines (default: `on`):
+Set the URL detection mode (default: `strict`):
 
 ```bash
-set -g @url-unwrap on   # Enable wrapped URL detection (default)
-set -g @url-unwrap off  # Disable if you experience issues
+set -g @url-detection-mode strict   # Only URLs with explicit schemes (default)
+set -g @url-detection-mode relaxed  # Include bare domains
 ```
 
-**How it works**: The plugin detects URLs that have been wrapped by the terminal at line width boundaries. When a line is completely filled (no trailing space) and the next line continues without leading space, they are merged. This accurately detects terminal-wrapped URLs while avoiding false positives from adjacent content.
+**Strict mode** (default):
+- Detects: `https://github.com`, `ftp://example.com`, `mailto:user@example.com`
+- Does NOT detect: `github.com`, `user@example.com` (without scheme)
+- Fewer false positives from domain-like text
 
-This is particularly useful for:
-- OAuth/authorization URLs with long query parameters
-- Deep file paths in URLs
-- URLs with extensive percent-encoding
-- API endpoints with multiple query parameters
-
-**Example of wrapped URL that will be detected**:
-```
-https://oauth.example.com/authorize?code=true&client_id=abc123def456&response_type=
-code&redirect_uri=https%3A%2F%2Fapp.example.com%2Fcallback&scope=read%20write&
-state=xyz789
-```
-
-The plugin specifically looks for the terminal line wrap signature: lines filled to the terminal width with no trailing whitespace, continuing immediately without leading whitespace on the next line.
+**Relaxed mode**:
+- Detects all URLs from strict mode PLUS:
+- Bare domains: `github.com` → `https://github.com`
+- More permissive but may include false positives
 
 ### Example Configuration
 
@@ -132,11 +126,11 @@ The plugin specifically looks for the terminal line wrap signature: lines filled
 # Custom key binding
 set -g @url-key 'o'
 
+# URL detection mode (strict by default)
+set -g @url-detection-mode strict  # or 'relaxed' for bare domains
+
 # Scan last 5000 lines
 set -g @url-buffer-lines 5000
-
-# Enable wrapped URL detection (default: on)
-set -g @url-unwrap on
 
 # Load plugin
 set -g @plugin 'tmux-contrib/tmux-url'
@@ -144,27 +138,37 @@ set -g @plugin 'tmux-contrib/tmux-url'
 
 ## URL Detection Patterns
 
-The plugin extracts three types of URLs (in order of precedence):
+### Strict Mode (Default)
 
-1. **Explicit Schemes**: `https://`, `http://`, `ftp://`, `ssh://`, `git://`
-   - Example: `https://github.com/tmux-contrib/tmux-url`
+In strict mode, only URLs with explicit schemes are detected:
 
-2. **Email Addresses**: Converted to `mailto:` links
-   - Example: `user@example.com` → `mailto:user@example.com`
+- **Supported schemes**: `https://`, `http://`, `ftp://`, `ftps://`, `ssh://`, `git://`, `mailto:`, `tel:`, `ws://`, and many more
+- Examples:
+  - `https://github.com/tmux-contrib/tmux-url` ✅
+  - `mailto:user@example.com` ✅
+  - `ssh://git@github.com/repo.git` ✅
+  - `github.com` ❌ (no scheme)
+  - `user@example.com` ❌ (no scheme)
 
-3. **Domain Names**: Common TLDs without schemes (auto-prepends `https://`)
+### Relaxed Mode (Opt-in)
+
+In relaxed mode (`set -g @url-detection-mode relaxed`), the plugin also detects:
+
+1. **Bare Domain Names**: Common TLDs without schemes (auto-prepends `https://`)
    - Example: `github.com` → `https://github.com`
    - Supported TLDs: .com, .org, .net, .io, .dev, .app, .co, .edu, and many more
+
+Note: Email addresses without `mailto:` prefix are NOT detected. Use explicit `mailto:user@example.com` format.
 
 ## Troubleshooting
 
 ### "Missing dependencies" error
 
-Make sure `gum` and `perl` are installed and available in your PATH:
+Make sure `gum` and `xurls` are installed and available in your PATH:
 
 ```bash
-which gum   # Should show path to gum
-which perl  # Should show path to perl
+which gum    # Should show path to gum
+which xurls  # Should show path to xurls
 ```
 
 ### "No URLs found" message
