@@ -6,6 +6,7 @@ A tmux plugin that extracts URLs from the current pane and allows interactive se
 
 - 🔍 **Smart URL Detection**: Extracts URLs with explicit schemes (http, https, ftp, git, ssh), email addresses, and common domain names
 - 🔗 **Wrapped URL Support**: Automatically detects and rejoins URLs that span multiple lines
+- 🎨 **ANSI Stripping**: Automatically removes ANSI escape sequences (colors, cursor movements) that can interfere with URL detection
 - 🎯 **Interactive Selection**: Beautiful terminal UI powered by gum filter
 - 🚀 **Quick Access**: Simple `Prefix + u` keybinding
 - 🌐 **Cross-Platform**: Works on macOS, Linux, and Windows
@@ -171,6 +172,20 @@ which perl  # Should show path to perl
 - Check that your pane actually contains URLs
 - Try increasing `@url-buffer-lines` to scan more history
 - Verify the URL format matches one of the supported patterns
+
+### URLs not detected in colored terminal output
+
+If you have colored terminal output (git colors, fancy prompts, syntax highlighting) and URLs aren't being detected, this is likely due to ANSI escape sequences.
+
+**Solution**: ANSI codes are automatically stripped before URL detection. This should work out of the box.
+
+**Debug**: Test by piping your tmux pane through `cat -v` to see if ANSI codes are present:
+
+```bash
+tmux capture-pane -p | cat -v
+```
+
+If you see sequences like `^[[32m`, `^[[0m`, those are ANSI codes that are now automatically handled.
 
 ### URLs not opening
 

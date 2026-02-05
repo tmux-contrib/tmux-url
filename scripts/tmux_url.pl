@@ -8,6 +8,31 @@
 use strict;
 use warnings;
 
+# Strip ANSI escape sequences from text
+sub strip_ansi {
+    my ($text) = @_;
+
+    # Remove ANSI escape sequences to prevent them from breaking URL detection
+    # This handles terminal color codes, cursor movements, and other control sequences
+
+    # CSI (Control Sequence Introducer) sequences: ESC [ <params> <letter>
+    # Matches patterns like: \033[31m (red), \033[0m (reset), \033[2J (clear screen)
+    $text =~ s/\x1b\[[0-9;]*[A-Za-z]//g;
+
+    # OSC (Operating System Command) sequences
+    # Terminated by BEL (0x07): \033]0;Title\007
+    $text =~ s/\x1b\][^\x07\x1b]*\x07//g;
+    # Terminated by ST (ESC \): \033]0;Title\033\\
+    $text =~ s/\x1b\][^\x1b]*\x1b\\//g;
+
+    # Other escape sequences: ESC followed by a single character
+    # This includes sequences like ESC =, ESC >, ESC c (reset), etc.
+    # But NOT ESC [ (CSI) which is handled above
+    $text =~ s/\x1b[^\[]//g;
+
+    return $text;
+}
+
 # Check if URL unwrapping is enabled (default: on)
 sub is_unwrap_enabled {
     my $unwrap_setting = $ENV{UNWRAP_URLS} || "on";
@@ -107,6 +132,10 @@ sub unwrap_urls {
 
 # Read all input from STDIN
 my $text = do { local $/; <STDIN> };
+
+# Strip ANSI escape sequences before processing URLs
+# This prevents terminal formatting codes from breaking URL detection
+$text = strip_ansi($text);
 
 # Unwrap URLs that span multiple lines
 $text = unwrap_urls($text);
