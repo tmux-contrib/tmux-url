@@ -8,31 +8,6 @@
 use strict;
 use warnings;
 
-# Strip ANSI escape sequences from text
-sub strip_ansi {
-    my ($text) = @_;
-
-    # Remove ANSI escape sequences to prevent them from breaking URL detection
-    # This handles terminal color codes, cursor movements, and other control sequences
-
-    # CSI (Control Sequence Introducer) sequences: ESC [ <params> <letter>
-    # Matches patterns like: \033[31m (red), \033[0m (reset), \033[2J (clear screen)
-    $text =~ s/\x1b\[[0-9;]*[A-Za-z]//g;
-
-    # OSC (Operating System Command) sequences
-    # Terminated by BEL (0x07): \033]0;Title\007
-    $text =~ s/\x1b\][^\x07\x1b]*\x07//g;
-    # Terminated by ST (ESC \): \033]0;Title\033\\
-    $text =~ s/\x1b\][^\x1b]*\x1b\\//g;
-
-    # Other escape sequences: ESC followed by a single character
-    # This includes sequences like ESC =, ESC >, ESC c (reset), etc.
-    # But NOT ESC [ (CSI) which is handled above
-    $text =~ s/\x1b[^\[]//g;
-
-    return $text;
-}
-
 # Check if URL unwrapping is enabled (default: on)
 sub is_unwrap_enabled {
     my $unwrap_setting = $ENV{UNWRAP_URLS} || "on";
@@ -40,67 +15,39 @@ sub is_unwrap_enabled {
 }
 
 # Check if next line continues the URL from current line
+# Based on terminal line wrapping signature:
+# - Current line is completely filled (no trailing whitespace)
+# - Next line continues immediately (no leading whitespace)
 sub _is_url_continuation {
     my ($current, $next) = @_;
 
-    # Empty lines or whitespace-only lines don't continue URLs
+    # Empty or whitespace-only lines don't continue
     return 0 if $next =~ /^\s*$/;
 
-    # Must have URL indicators in current line (scheme, domain pattern, or common URL chars)
+    # Next line must NOT start with whitespace (terminal wrap has no leading space)
+    return 0 if $next =~ /^\s/;
+
+    # Current line must NOT end with whitespace (terminal wrap fills the line)
+    # This is the key signature of a terminal-wrapped line
+    return 0 if $current =~ /\s$/;
+
+    # Current line must contain URL-like content
+    # Check for scheme, domain pattern, or URL path characters
     return 0 unless $current =~ m{(?:https?://|ftps?://|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|[/?#@&=%])};
 
-    # If next line starts with a new URL scheme, it's a separate URL
-    return 0 if $next =~ m{^\s*[a-zA-Z][a-zA-Z0-9+.-]*://};
+    # If next line starts with a new URL scheme, it's separate
+    return 0 if $next =~ m{^[a-zA-Z][a-zA-Z0-9+.-]*://};
 
-    # If next line looks like a complete URL/domain/email by itself, don't merge
-    # Check for: domain.tld, email@domain.tld, or scheme://
+    # If next line looks like a complete domain by itself, don't merge
     return 0 if $next =~ m{^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}(?:\s|$)};
-    return 0 if $next =~ m{^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\s|$)};
 
-    # If next line is just a word followed by colon (like "remote:", "origin:"), don't merge
-    # This prevents git output labels from being merged into URLs
-    return 0 if $next =~ m{^[a-zA-Z][a-zA-Z0-9]*:\s*$};
+    # Next line should start with URL path characters (not labels like "remote:")
+    # URL path chars: alphanumeric, dash, slash, question mark, ampersand, equals, percent, etc.
+    # Explicitly reject patterns like "word:" which are labels, not URL content
+    return 0 if $next =~ m{^[a-zA-Z]+:\s*$};
 
-    # If next line starts with common English words or prose, don't merge
-    # This catches cases like "This is some text" or "Thanks!"
-    return 0 if $next =~ m{^(?:This|The|That|These|Those|It|Thanks|Please|Note|See|Check|Visit)\b}i;
-    return 0 if $next =~ m{^[A-Z][a-z]+\s+(?:is|are|was|were|has|have|had)\b};
-
-    # Signature pattern detection: capitalized words (e.g., "Senior Developer")
-    # Don't merge email addresses with job titles or signatures
-    return 0 if $next =~ m{^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\s*$};
-
-    # If current line ends with sentence-ending punctuation followed by space, don't continue
-    return 0 if $current =~ m{[.!?]\s+$};
-
-    # URL path characters that indicate continuation
-    my $url_path_chars = '[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=%-]';
-
-    # Strong indicators that URL continues:
-    # 1. Ends with hyphen (common line break point)
-    # 2. Ends with & (query parameter continuation)
-    # 3. Ends with incomplete percent encoding (%XX pattern)
-    # 4. Ends with = (query parameter value follows)
-    if ($current =~ m{[-&=]$} || $current =~ m{%[0-9A-Fa-f]?$}) {
-        # Next line should start with URL path character
-        # Already filtered out prose above, so if we get here and next starts with path char, merge
-        return 1 if $next =~ m{^$url_path_chars};
-    }
-
-    # General case: current line ends with URL path char and next starts with one
-    # But be conservative - only merge if next line doesn't look like prose
-    if ($current =~ m{$url_path_chars$} && $next =~ m{^$url_path_chars}) {
-        # Additional check: avoid merging if current ends with common sentence punctuation
-        return 0 if $current =~ m{[.,;:]$} && $next =~ m{^[A-Z\s]};
-
-        # Don't merge if next line starts with just letters (likely prose)
-        # Allow continuation only if next starts with: numbers, special URL chars, or lowercase letter after /
-        return 0 if $next =~ m{^[A-Z][a-z]};
-
-        return 1;
-    }
-
-    return 0;
+    # Otherwise, it's likely a wrapped continuation
+    return 1;
 }
 
 # Unwrap URLs that have been wrapped across multiple lines
@@ -136,10 +83,6 @@ sub unwrap_urls {
 
 # Read all input from STDIN
 my $text = do { local $/; <STDIN> };
-
-# Strip ANSI escape sequences before processing URLs
-# This prevents terminal formatting codes from breaking URL detection
-$text = strip_ansi($text);
 
 # Unwrap URLs that span multiple lines
 $text = unwrap_urls($text);
