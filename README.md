@@ -1,6 +1,6 @@
 # tmux-url
 
-A tmux plugin that extracts URLs from the current pane and allows interactive selection using [gum](https://github.com/charmbracelet/gum).
+Extract and open URLs from your tmux pane with a beautiful interactive picker powered by [gum](https://github.com/charmbracelet/gum).
 
 ## Dependencies
 
