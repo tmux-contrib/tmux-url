@@ -1,35 +1,15 @@
-# Vim
+# Nix
+result
+result-*
+.direnv/
+
+# Editors
 *.swp
 *.swo
 *~
-.*.sw?
+.vscode/
+.idea/
 
-# Emacs
-*~
-\#*\#
-.\#*
-
-# macOS
+# OS
 .DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-
-# Linux
-*~
-.directory
-.Trash-*
-
-# Windows
 Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Logs
-*.log
-
-# Temporary files
-tmp/
-temp/
-*.tmp
