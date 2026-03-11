@@ -1,5 +1,7 @@
 # tmux-url
 
+[![Test](https://github.com/tmux-contrib/tmux-url/actions/workflows/test.yml/badge.svg)](https://github.com/tmux-contrib/tmux-url/actions/workflows/test.yml) [![Release](https://img.shields.io/github/v/release/tmux-contrib/tmux-url)](https://github.com/tmux-contrib/tmux-url/releases) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Extract and open URLs from your tmux pane with a beautiful interactive picker powered by [gum](https://github.com/charmbracelet/gum).
 
 ## Dependencies
