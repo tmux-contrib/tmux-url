@@ -1,13 +1,15 @@
 # tmux-url
 
-> Extract and open URLs from your tmux pane with a beautiful interactive picker powered by [gum](https://github.com/charmbracelet/gum).
+> Extract and open URLs from your tmux pane with a beautiful interactive picker powered by [fzf](https://github.com/junegunn/fzf).
+
+This is a fork, where i replace gum with fzf.
 
 [![CI](https://github.com/tmux-contrib/tmux-url/actions/workflows/ci.yml/badge.svg)](https://github.com/tmux-contrib/tmux-url/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/tmux-contrib/tmux-url)](https://github.com/tmux-contrib/tmux-url/releases) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Dependencies
 
 - [tmux](https://github.com/tmux/tmux) (version 1.8+)
-- [gum](https://github.com/charmbracelet/gum) - Terminal UI toolkit
+- [fzf](https://github.com/junegunn/fzf) - Fuzzy finder and picker
 - [xurls](https://github.com/mvdan/xurls) - URL extractor
 
 ## Installation
@@ -15,7 +17,7 @@
 Add this plugin to your `~/.tmux.conf`:
 
 ```tmux
-set -g @plugin 'tmux-contrib/tmux-url'
+set -g @plugin 'ADemkin/tmux-fzf-url'
 ```
 
 And install it by running `<prefix> + I`.

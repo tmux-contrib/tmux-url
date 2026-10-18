@@ -75,7 +75,7 @@ _show_url_list() {
 	fi
 
 	local url
-	url=$(echo "$url_list" | gum filter --placeholder="Select URL to open..." --padding "0 0 -1 0")
+	url=$(echo "$url_list" | fzf)
 
 	if [ -n "$url" ]; then
 		local url_opener
