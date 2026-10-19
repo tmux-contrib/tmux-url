@@ -7,7 +7,8 @@
 ## Dependencies
 
 - [tmux](https://github.com/tmux/tmux) (version 1.8+)
-- [gum](https://github.com/charmbracelet/gum) - Terminal UI toolkit
+- [gum](https://github.com/charmbracelet/gum) - Terminal UI toolkit (default picker)
+- [fzf](https://github.com/junegunn/fzf) - Fuzzy finder (optional, only if `@url-picker` is `fzf`)
 - [xurls](https://github.com/mvdan/xurls) - URL extractor
 
 ## Installation
@@ -44,6 +45,10 @@ set -g @url-key 'o'
 set -g @url-detection-mode strict   # Only URLs with explicit schemes
 set -g @url-detection-mode relaxed  # Include bare domains
 
+# Picker backend (default: gum)
+set -g @url-picker gum   # Use gum
+set -g @url-picker fzf   # Use fzf instead (gum is then not required)
+
 # Buffer scan depth (default: 10000)
 set -g @url-buffer-lines 5000
 ```
@@ -54,6 +59,7 @@ set -g @url-buffer-lines 5000
 |------------------------|------------|----------------------------------------|
 | `@url-key`             | `"u"`      | Key binding for URL picker             |
 | `@url-detection-mode`  | `"strict"` | URL detection mode (strict or relaxed) |
+| `@url-picker`          | `"gum"`    | Picker backend (gum or fzf)            |
 | `@url-buffer-lines`    | `"10000"`  | Lines to scan from pane history        |
 
 ### Detection Modes

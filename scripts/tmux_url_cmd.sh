@@ -58,6 +58,17 @@ _get_url_list() {
 	_tmux_get_pane_content "$pane" | xurls $xurls_flags | sort -u
 }
 
+_pick_url() {
+	case "$(_tmux_get_picker)" in
+	fzf)
+		fzf --prompt="Select URL to open> "
+		;;
+	*)
+		gum filter --placeholder="Select URL to open..." --padding "0 0 -1 0"
+		;;
+	esac
+}
+
 _show_url_list() {
 	local url_file="$1"
 
@@ -75,7 +86,7 @@ _show_url_list() {
 	fi
 
 	local url
-	url=$(echo "$url_list" | gum filter --placeholder="Select URL to open..." --padding "0 0 -1 0")
+	url=$(echo "$url_list" | _pick_url)
 
 	if [ -n "$url" ]; then
 		local url_opener
