@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/tmux-contrib/tmux-url/compare/v0.2.2...v0.3.0) (2026-10-19)
+
+
+### Features
+
+* add [@url-picker](https://github.com/url-picker) option to use fzf instead of gum ([#39](https://github.com/tmux-contrib/tmux-url/issues/39)) ([d970833](https://github.com/tmux-contrib/tmux-url/commit/d97083348b7f43df2329c1095ddf11947595fed4)), closes [#37](https://github.com/tmux-contrib/tmux-url/issues/37)
+
 ## [0.2.2](https://github.com/tmux-contrib/tmux-url/compare/v0.2.1...v0.2.2) (2026-05-04)
 
 
