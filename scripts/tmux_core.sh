@@ -24,3 +24,14 @@ _tmux_set_session_option() {
 
 	tmux set-option -t "$session" "$option" "$value"
 }
+
+# Interactive picker backend: "gum" (default) or "fzf". Unknown values fall back to gum.
+_tmux_get_picker() {
+	local picker
+	picker="$(_tmux_get_option "@url-picker" "gum")"
+
+	case "$picker" in
+	gum | fzf) echo "$picker" ;;
+	*) echo "gum" ;;
+	esac
+}

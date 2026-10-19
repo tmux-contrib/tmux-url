@@ -15,8 +15,11 @@ source "$_tmux_url_root/scripts/tmux_core.sh"
 _check_dependencies() {
 	local missing_deps=()
 
-	if ! command -v gum &>/dev/null; then
-		missing_deps+=("gum")
+	local picker
+	picker=$(_tmux_get_picker)
+
+	if ! command -v "$picker" &>/dev/null; then
+		missing_deps+=("$picker")
 	fi
 
 	if ! command -v xurls &>/dev/null; then
@@ -33,6 +36,11 @@ _check_dependencies() {
 				echo "  gum: https://github.com/charmbracelet/gum#installation"
 				echo "    - macOS: brew install gum"
 				echo "    - Linux: https://github.com/charmbracelet/gum/releases"
+				;;
+			fzf)
+				echo "  fzf: https://github.com/junegunn/fzf#installation"
+				echo "    - macOS: brew install fzf"
+				echo "    - Linux: https://github.com/junegunn/fzf/releases"
 				;;
 			xurls)
 				echo "  xurls: https://github.com/mvdan/xurls"
